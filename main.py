@@ -37,6 +37,7 @@ class AndroidBuild(CrossBuild):
 
     def buildListView(self, model):
         print(self.buildObjectListFragment(model))
+        print(self.buildObjectListAdapter(model))
 
     def buildObjectDetailFragment(self, model):
         ret="""
@@ -83,7 +84,10 @@ class AndroidBuild(CrossBuild):
         return ret
     
     def buildObjectListAdapter(self, model):
-        ret="""public class """+model["model"]["name"]+"""Adapter extends ArrayAdapter<"""+model["model"]["name"]+"""> {
+        ret="""
+        package """+model["model"]["name"]+""";
+        
+        public class """+model["model"]["name"]+"""Adapter extends ArrayAdapter<"""+model["model"]["name"]+"""> {
 
         private static class ViewHolder {
             private TextView itemView;
