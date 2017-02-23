@@ -149,5 +149,5 @@ class AndroidBuild(CrossBuild):
 
 if __name__ == "__main__":
     course = AndroidBuild("fr.efenua.course")
-    course.loadConfig("config.json")
+    course.loadConfig("../crossCodeData/config.json")
     course.build()
