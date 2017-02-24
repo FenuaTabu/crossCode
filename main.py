@@ -192,11 +192,7 @@ class AndroidBuild(CrossBuild):
         android:orientation="vertical" 
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
-        """
-        for fields in view:
-            for field in fields:
-                if model[field]["type"] == "textField":
-                        ret+="""
+
                         <TextView android:layout_width="match_parent" 
                             android:id="@+id/testoRicercaMulti"
                             android:layout_height="wrap_content" 
@@ -204,8 +200,8 @@ class AndroidBuild(CrossBuild):
                             android:layout_gravity="center" android:layout_marginLeft="10dp"
                             android:layout_marginRight="10dp">
                         </TextView>
-                        """
-        ret+="""
+
+
         </LinearLayout>
         """
         return ret
