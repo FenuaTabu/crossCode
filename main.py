@@ -1,9 +1,14 @@
 import json
 import os
+import inflection
 
 class CrossBuild():
     config = None
     output = []
+    
+    def convert(name):
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def loadConfig(self, config):
         with open(config) as data_file:
@@ -157,7 +162,7 @@ class AndroidBuild(CrossBuild):
                 @Override
                 public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                 Bundle savedInstanceState) {
-                        View view = inflater.inflate(R.layout."""+model["name"]+"""_list_fragment,
+                        View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_list_fragment,
                                         container, false);
                         Button button = (Button) view.findViewById(R.id.button1);
                         button.setOnClickListener(new View.OnClickListener() {
@@ -215,7 +220,7 @@ class AndroidBuild(CrossBuild):
                     if attribute["type"] == "charField":
                         ret+="""
                          <TextView android:layout_width="match_parent" 
-                             android:id="@+id/"""+attribute["name"]+"""\"
+                             android:id="@+id/"""+inflection.underscore(attribute["name"])+"""\"
                              android:layout_height="wrap_content" 
                              android:textSize="14dp" android:gravity="center"
                              android:layout_gravity="center" android:layout_marginLeft="10dp"
