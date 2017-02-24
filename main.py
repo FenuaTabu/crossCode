@@ -42,12 +42,12 @@ class AndroidBuild(CrossBuild):
         self.packageName = packageName
 
     def buildDetailView(self, model, view):
-        self.output.append(["java", "path/file.ext", self.buildObjectDetailFragment(model, view)])
-        self.output.append(["xml", "path/file.ext", self.buildLayoutDetail(model, view)])
+        self.output.append(("java", "path/file.ext", self.buildObjectDetailFragment(model, view)))
+        self.output.append(("xml", "path/file.ext", self.buildLayoutDetail(model, view)))
 
     def buildListView(self, model, view):
-        self.output.append(["java", "path/file.ext", self.buildObjectListFragment(model, view)])
-        self.output.append(["java", "path/file.ext", self.buildObjectListAdapter(model, view)])
+        self.output.append(("java", "path/file.ext", self.buildObjectListFragment(model, view)))
+        self.output.append(("java", "path/file.ext", self.buildObjectListAdapter(model, view)))
 
     def buildObjectDetailFragment(self, model, view):
         ret="""
@@ -227,4 +227,4 @@ if __name__ == "__main__":
     course = AndroidBuild("fr.efenua.course")
     course.loadConfig("../crossCodeData/config.json")
     course.build()
-    course.render()
+    print(course.render())
