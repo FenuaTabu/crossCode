@@ -12,7 +12,7 @@ class CrossBuild():
             for view in build["views"]:
                 if(view["type"] == "listView"):
                     self.buildListView(build["model"], view)
-                if(buildView == "detailView"):
+                if(view == "detailView"):
                     self.buildDetailView(build["model"], view)
 
     def buildDetailView(self, model, view):
@@ -33,6 +33,7 @@ class AndroidBuild(CrossBuild):
 
     def buildDetailView(self, model, view):
         print(self.buildObjectDetailFragment(model, view))
+        print(self.buildLayoutDetail(model, view))
 
     def buildListView(self, model, view):
         print(self.buildObjectListFragment(model, view))
