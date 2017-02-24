@@ -194,6 +194,7 @@ class AndroidBuild(CrossBuild):
         android:layout_height="fill_parent" >
         """
         for field in view["fields"]:
+            print("field = " + field)
             if model[field]["type"] == "textField":
                     ret+="""
 
