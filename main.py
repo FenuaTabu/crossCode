@@ -2,6 +2,7 @@ import json
 
 class CrossBuild():
     config = None
+    output = []
 
     def loadConfig(self, config):
         with open(config) as data_file:
@@ -21,9 +22,18 @@ class CrossBuild():
     def buildListView(self, model, view):
         pass
 
+    def render(self):
+        ret = ""
+        for outType, outPath, outContent in self.output:
+            ret += outContent
+            
+        return ret
 
 class DjangoBuild(CrossBuild):
     def build(self):
+        pass
+    
+    def buildModel(self):
         pass
 
 
@@ -32,12 +42,12 @@ class AndroidBuild(CrossBuild):
         self.packageName = packageName
 
     def buildDetailView(self, model, view):
-        print(self.buildObjectDetailFragment(model, view))
-        print(self.buildLayoutDetail(model, view))
+        self.output.append("java", "path/file.ext", self.buildObjectDetailFragment(model, view))
+        self.output.append("xml", "path/file.ext", self.buildLayoutDetail(model, view))
 
     def buildListView(self, model, view):
-        print(self.buildObjectListFragment(model, view))
-        print(self.buildObjectListAdapter(model, view))
+        self.output.append("java", "path/file.ext", self.buildObjectListFragment(model, view))
+        self.output.append("java", "path/file.ext", self.buildObjectListAdapter(model, view))
 
     def buildObjectDetailFragment(self, model, view):
         ret="""
@@ -194,18 +204,18 @@ class AndroidBuild(CrossBuild):
         android:layout_height="fill_parent" >
         """
         for field in view["fields"]:
-            print("field = " + field)
-            if model[field]["type"] == "textField":
-                    ret+="""
-
-                     <TextView android:layout_width="match_parent" 
-                         android:id="@+id/testoRicercaMulti"
-                         android:layout_height="wrap_content" 
-                         android:textSize="14dp" android:gravity="center"
-                         android:layout_gravity="center" android:layout_marginLeft="10dp"
-                         android:layout_marginRight="10dp">
-                     </TextView>
-                    """
+            for attribute in model["attributes"]:
+                if attribute["name"] == field:
+                    if attribute["type"] == "charField":
+                        ret+="""
+                         <TextView android:layout_width="match_parent" 
+                             android:id="@+id/"""+attribute["name"]+"""\"
+                             android:layout_height="wrap_content" 
+                             android:textSize="14dp" android:gravity="center"
+                             android:layout_gravity="center" android:layout_marginLeft="10dp"
+                             android:layout_marginRight="10dp">
+                         </TextView>
+                        """
         ret+="""
 
         </LinearLayout>
@@ -217,3 +227,4 @@ if __name__ == "__main__":
     course = AndroidBuild("fr.efenua.course")
     course.loadConfig("../crossCodeData/config.json")
     course.build()
+    course.render()
