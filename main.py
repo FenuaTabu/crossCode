@@ -9,10 +9,6 @@ class CrossBuild():
         with open(config) as data_file:
             self.config = json.load(data_file)
 
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, "w") as f:
-            f.write("FOOBAR")
-
     def build(self):
         for build in self.config:
             for view in build["views"]:
