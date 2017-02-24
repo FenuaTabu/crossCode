@@ -12,7 +12,7 @@ class CrossBuild():
             for view in build["views"]:
                 if(view["type"] == "listView"):
                     self.buildListView(build["model"], view)
-                if(view == "detailView"):
+                if(view["type"] == "detailView"):
                     self.buildDetailView(build["model"], view)
 
     def buildDetailView(self, model, view):
