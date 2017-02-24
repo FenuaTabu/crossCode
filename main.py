@@ -78,7 +78,7 @@ class AndroidBuild(CrossBuild):
             @Override
             public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                      Bundle savedInstanceState) {
-                View view = inflater.inflate(R.layout."""+model["name"]+"""_detail_fragment,
+                View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_detail_fragment,
                         container, false);
                 returrn view;
             }
