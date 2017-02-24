@@ -8,18 +8,17 @@ class CrossBuild():
             self.config = json.load(data_file)
 
     def build(self):
-        for model in self.config:
-            for build in model["model"]["builds"]:
-                for buildView in build:
-                    if(buildView == "listView"):
-                        self.buildListView(model)
-                    if(buildView == "detailView"):
-                        self.buildDetailView(model)
+        for build in self.config:
+            for view in build["views"]:
+                if(view["type"] == "listView"):
+                    self.buildListView(build["model"], view)
+                if(buildView == "detailView"):
+                    self.buildDetailView(build["model"], view)
 
-    def buildDetailView(self, model):
+    def buildDetailView(self, model, view):
         pass
 
-    def buildListView(self, model):
+    def buildListView(self, model, view):
         pass
 
 
@@ -32,16 +31,16 @@ class AndroidBuild(CrossBuild):
     def __init__(self, packageName):
         self.packageName = packageName
 
-    def buildDetailView(self, model):
-        print(self.buildObjectDetailFragment(model))
+    def buildDetailView(self, model, view):
+        print(self.buildObjectDetailFragment(model, view))
 
-    def buildListView(self, model):
-        print(self.buildObjectListFragment(model))
-        print(self.buildObjectListAdapter(model))
+    def buildListView(self, model, view):
+        print(self.buildObjectListFragment(model, view))
+        print(self.buildObjectListAdapter(model, view))
 
-    def buildObjectDetailFragment(self, model):
+    def buildObjectDetailFragment(self, model, view):
         ret="""
-        package """+model["model"]["name"]+""";
+        package """+model["name"]+""";
 
         import android.app.Fragment;
         import android.os.Bundle;
@@ -51,13 +50,13 @@ class AndroidBuild(CrossBuild):
         import android.widget.TextView;
 
 
-        public class """+model["model"]["name"]+"""DetailFragment extends Fragment {
+        public class """+model["name"]+"""DetailFragment extends Fragment {
             public static final String EXTRA_URL = "url";
 
             @Override
             public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                      Bundle savedInstanceState) {
-                View view = inflater.inflate(R.layout."""+model["model"]["name"]+"""_detail_fragment,
+                View view = inflater.inflate(R.layout."""+model["name"]+"""_detail_fragment,
                         container, false);
                 returrn view;
             }
@@ -83,17 +82,17 @@ class AndroidBuild(CrossBuild):
         }"""
         return ret
     
-    def buildObjectListAdapter(self, model):
+    def buildObjectListAdapter(self, model, view):
         ret="""
-        package """+model["model"]["name"]+""";
+        package """+model["name"]+""";
         
-        public class """+model["model"]["name"]+"""Adapter extends ArrayAdapter<"""+model["model"]["name"]+"""> {
+        public class """+model["name"]+"""Adapter extends ArrayAdapter<"""+model["name"]+"""> {
 
         private static class ViewHolder {
             private TextView itemView;
         }
 
-        public """+model["model"]["name"]+"""Adapter(Context context, int textViewResourceId, ArrayList<"""+model["model"]["name"]+"""> items) {
+        public """+model["name"]+"""Adapter(Context context, int textViewResourceId, ArrayList<"""+model["name"]+"""> items) {
             super(context, textViewResourceId, items);
         }
 
@@ -123,9 +122,9 @@ class AndroidBuild(CrossBuild):
         } """
         return ret
 
-    def buildObjectListFragment(self, model):
+    def buildObjectListFragment(self, model, view):
         ret = """
-        package """+model["model"]["name"]+""";
+        package """+model["name"]+""";
 
         import android.app.Activity;
         import android.app.Fragment;
@@ -135,13 +134,13 @@ class AndroidBuild(CrossBuild):
         import android.view.ViewGroup;
         import android.widget.Button;
 
-        public class """+model["model"]["name"]+"""ListFragment extends Fragment {
+        public class """+model["name"]+"""ListFragment extends Fragment {
                 private OnItemSelectedListener listener;
 
                 @Override
                 public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                 Bundle savedInstanceState) {
-                        View view = inflater.inflate(R.layout."""+model["model"]["name"]+"""_list_fragment,
+                        View view = inflater.inflate(R.layout."""+model["name"]+"""_list_fragment,
                                         container, false);
                         Button button = (Button) view.findViewById(R.id.button1);
                         button.setOnClickListener(new View.OnClickListener() {
@@ -185,7 +184,30 @@ class AndroidBuild(CrossBuild):
                 }
         }"""
         return ret
-
+    
+    def buildLayoutDetail(self, model, view):
+        ret = """
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+        """
+        for fields in view:
+            for field in fields:
+                if model[field]["type"] == "textField":
+                        ret+="""
+                        <TextView android:layout_width="match_parent" 
+                            android:id="@+id/testoRicercaMulti"
+                            android:layout_height="wrap_content" 
+                            android:textSize="14dp" android:gravity="center"
+                            android:layout_gravity="center" android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp">
+                        </TextView>
+                        """
+        ret+="""
+        </LinearLayout>
+        """
+        return ret
 
 
 if __name__ == "__main__":
