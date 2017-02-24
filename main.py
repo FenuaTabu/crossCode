@@ -1,4 +1,5 @@
 import json
+import os
 
 class CrossBuild():
     config = None
@@ -7,6 +8,10 @@ class CrossBuild():
     def loadConfig(self, config):
         with open(config) as data_file:
             self.config = json.load(data_file)
+
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as f:
+            f.write("FOOBAR")
 
     def build(self):
         for build in self.config:
@@ -26,7 +31,9 @@ class CrossBuild():
         ret = ""
         for outType, outPath, outContent in self.output:
             ret += outContent
-            
+            os.makedirs(os.path.dirname(outPath), exist_ok=True)
+            with open(filename, "w") as f:
+                f.write(outContent)
         return ret
 
 class DjangoBuild(CrossBuild):
@@ -42,12 +49,12 @@ class AndroidBuild(CrossBuild):
         self.packageName = packageName
 
     def buildDetailView(self, model, view):
-        self.output.append(("java", "path/file.ext", self.buildObjectDetailFragment(model, view)))
-        self.output.append(("xml", "path/file.ext", self.buildLayoutDetail(model, view)))
+        self.output.append(("java", "./android/detail_fragment.java", self.buildObjectDetailFragment(model, view)))
+        self.output.append(("xml", "./android/detail_layout.xml", self.buildLayoutDetail(model, view)))
 
     def buildListView(self, model, view):
-        self.output.append(("java", "path/file.ext", self.buildObjectListFragment(model, view)))
-        self.output.append(("java", "path/file.ext", self.buildObjectListAdapter(model, view)))
+        self.output.append(("java", "./android/list_fragment.java", self.buildObjectListFragment(model, view)))
+        self.output.append(("java", "./android/list_adapter.java", self.buildObjectListAdapter(model, view)))
 
     def buildObjectDetailFragment(self, model, view):
         ret="""
