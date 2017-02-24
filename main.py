@@ -32,7 +32,7 @@ class CrossBuild():
         for outType, outPath, outContent in self.output:
             ret += outContent
             os.makedirs(os.path.dirname(outPath), exist_ok=True)
-            with open(filename, "w") as f:
+            with open(outPath, "w") as f:
                 f.write(outContent)
         return ret
 
