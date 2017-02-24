@@ -62,86 +62,86 @@ class AndroidBuild(CrossBuild):
 
     def buildObjectDetailFragment(self, model, view):
         ret="""
-        package """+model["name"]+""";
+package """+model["name"]+""";
 
-        import android.app.Fragment;
-        import android.os.Bundle;
-        import android.view.LayoutInflater;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.TextView;
-
-
-        public class """+model["name"]+"""DetailFragment extends Fragment {
-            public static final String EXTRA_URL = "url";
-
-            @Override
-            public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                     Bundle savedInstanceState) {
-                View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_detail_fragment,
-                        container, false);
-                returrn view;
-            }
-
-            @Override
-            public void onActivityCreated(Bundle savedInstanceState) {
-                super.onActivityCreated(savedInstanceState);
-                Bundle bundle = getArguments();
-
-                //TODO
-                //if (bundle != null) {
-                //    String link = bundle.getString("url");
-                //    setText(link);
-                //}
-            }
+import android.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 
-                public void setText(String url) {
-                        // TODO
-                        //TextView view = (TextView) getView().findViewById(R.id.detailsText);
-                        //view.setText(url);
-                }
-        }"""
+public class """+model["name"]+"""DetailFragment extends Fragment {
+    public static final String EXTRA_URL = "url";
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_detail_fragment,
+                container, false);
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Bundle bundle = getArguments();
+
+        //TODO
+        //if (bundle != null) {
+        //    String link = bundle.getString("url");
+        //    setText(link);
+        //}
+    }
+
+
+        public void setText(String url) {
+                // TODO
+                //TextView view = (TextView) getView().findViewById(R.id.detailsText);
+                //view.setText(url);
+        }
+}"""
         return ret
     
     def buildObjectListAdapter(self, model, view):
         ret="""
-        package """+model["name"]+""";
-        
-        public class """+model["name"]+"""Adapter extends ArrayAdapter<"""+model["name"]+"""> {
+package """+model["name"]+""";
 
-        private static class ViewHolder {
-            private TextView itemView;
-        }
+public class """+model["name"]+"""Adapter extends ArrayAdapter<"""+model["name"]+"""> {
 
-        public """+model["name"]+"""Adapter(Context context, int textViewResourceId, ArrayList<"""+model["name"]+"""> items) {
-            super(context, textViewResourceId, items);
-        }
+private static class ViewHolder {
+    private TextView itemView;
+}
 
-        public View getView(int position, View convertView, ViewGroup parent) {
+public """+model["name"]+"""Adapter(Context context, int textViewResourceId, ArrayList<"""+model["name"]+"""> items) {
+    super(context, textViewResourceId, items);
+}
 
-            if (convertView == null) {
-                convertView = LayoutInflater.from(this.getContext())
-                .inflate(R.layout.listview_association, parent, false);
+public View getView(int position, View convertView, ViewGroup parent) {
 
-                viewHolder = new ViewHolder();
-                viewHolder.itemView = (TextView) convertView.findViewById(R.id.ItemView);
+    if (convertView == null) {
+        convertView = LayoutInflater.from(this.getContext())
+        .inflate(R.layout.listview_association, parent, false);
 
-                convertView.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
+        viewHolder = new ViewHolder();
+        viewHolder.itemView = (TextView) convertView.findViewById(R.id.ItemView);
 
-            MyClass item = getItem(position);
-            if (item!= null) {
-                // My layout has only one TextView
-                    // do whatever you want with your string and long
-                viewHolder.itemView.setText(String.format("%s %d", item.reason, item.long_val));
-            }
+        convertView.setTag(viewHolder);
+    } else {
+        viewHolder = (ViewHolder) convertView.getTag();
+    }
 
-            return convertView;
-        }
-        } """
+    MyClass item = getItem(position);
+    if (item!= null) {
+        // My layout has only one TextView
+            // do whatever you want with your string and long
+        viewHolder.itemView.setText(String.format("%s %d", item.reason, item.long_val));
+    }
+
+    return convertView;
+}
+} """
         return ret
 
     def buildObjectListFragment(self, model, view):
