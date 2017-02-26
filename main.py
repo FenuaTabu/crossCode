@@ -16,12 +16,20 @@ class CrossBuild():
 
     def build(self):
         for build in self.config:
+            # models
+            for model in build["models"]:
+                self.buildModel(model)
+            
+            # views
             for view in build["views"]:
                 if(view["type"] == "listView"):
-                    self.buildListView(build["model"], view)
+                    self.buildListView(build["models"], view)
                 if(view["type"] == "detailView"):
-                    self.buildDetailView(build["model"], view)
+                    self.buildDetailView(build["models"], view)
 
+    def buildModel(self, model):
+        pass
+    
     def buildDetailView(self, model, view):
         pass
 
@@ -49,188 +57,127 @@ class DjangoBuild(CrossBuild):
 
 
 class AndroidBuild(CrossBuild):
+    ctype = {"Auto": "Integer", "Char": "String", "Boolean": "boolean"}
+    
     def __init__(self, packageName):
         self.packageName = packageName
 
     def buildDetailView(self, model, view):
-        self.output.append(("java", "./android/detail_fragment.java", self.buildObjectDetailFragment(model, view)))
-        self.output.append(("xml", "./android/detail_layout.xml", self.buildLayoutDetail(model, view)))
+        pass
 
     def buildListView(self, model, view):
-        self.output.append(("java", "./android/list_fragment.java", self.buildObjectListFragment(model, view)))
-        self.output.append(("java", "./android/list_adapter.java", self.buildObjectListAdapter(model, view)))
+        pass
+        
+    def buildModel(self, model):
+        self.output.append(("java", "./android/model/"+model["name"], self.buidlModelEntity(model)))
+        
+    def buidlModelEntity(self, model):
+        ret="""package com.efenua.courselocal.model;
 
-    def buildObjectDetailFragment(self, model, view):
-        ret="""
-package """+model["name"]+""";
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import android.app.Fragment;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+/**
+ * Generate by crossCode.
+ */
 
-
-public class """+model["name"]+"""DetailFragment extends Fragment {
-    public static final String EXTRA_URL = "url";
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_detail_fragment,
-                container, false);
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Bundle bundle = getArguments();
-
-        //TODO
-        //if (bundle != null) {
-        //    String link = bundle.getString("url");
-        //    setText(link);
-        //}
-    }
-
-
-        public void setText(String url) {
-                // TODO
-                //TextView view = (TextView) getView().findViewById(R.id.detailsText);
-                //view.setText(url);
-        }
-}"""
-        return ret
+public class """ + model["name"] + """ implements Parcelable {"""
     
-    def buildObjectListAdapter(self, model, view):
-        ret="""
-package """+model["name"]+""";
-
-public class """+model["name"]+"""Adapter extends ArrayAdapter<"""+model["name"]+"""> {
-
-private static class ViewHolder {
-    private TextView itemView;
-}
-
-public """+model["name"]+"""Adapter(Context context, int textViewResourceId, ArrayList<"""+model["name"]+"""> items) {
-    super(context, textViewResourceId, items);
-}
-
-public View getView(int position, View convertView, ViewGroup parent) {
-
-    if (convertView == null) {
-        convertView = LayoutInflater.from(this.getContext())
-        .inflate(R.layout.listview_association, parent, false);
-
-        viewHolder = new ViewHolder();
-        viewHolder.itemView = (TextView) convertView.findViewById(R.id.ItemView);
-
-        convertView.setTag(viewHolder);
-    } else {
-        viewHolder = (ViewHolder) convertView.getTag();
-    }
-
-    MyClass item = getItem(position);
-    if (item!= null) {
-        // My layout has only one TextView
-            // do whatever you want with your string and long
-        viewHolder.itemView.setText(String.format("%s %d", item.reason, item.long_val));
-    }
-
-    return convertView;
-}
-} """
-        return ret
-
-    def buildObjectListFragment(self, model, view):
-        ret = """
-        package """+model["name"]+""";
-
-        import android.app.Activity;
-        import android.app.Fragment;
-        import android.os.Bundle;
-        import android.view.LayoutInflater;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.Button;
-
-        public class """+model["name"]+"""ListFragment extends Fragment {
-                private OnItemSelectedListener listener;
-
-                @Override
-                public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                Bundle savedInstanceState) {
-                        View view = inflater.inflate(R.layout."""+inflection.underscore(model["name"])+"""_list_fragment,
-                                        container, false);
-                        Button button = (Button) view.findViewById(R.id.button1);
-                        button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                        updateDetail("fake");
-                                }
-                        });
-                        return view;
-                }
-
-                public interface OnItemSelectedListener {
-                        public void onRssItemSelected(String link);
-                }
-
-
-                @Override
-                public void onAttach(Context context) {
-                        super.onAttach(context);
-                        if (context instanceof OnItemSelectedListener) {
-                                listener = (OnItemSelectedListener) context;
-                        } else {
-                                throw new ClassCastException(context.toString()
-                                                + " must implemenet MyListFragment.OnItemSelectedListener");
-                        }
-                }
-
-                @Override
-                public void onDetach() {
-                        super.onDetach();
-                        listener = null;
-                }
-
-                // may also be triggered from the Activity
-                public void updateDetail(String uri) {
-                        // create a string just for testing
-                        String newTime = String.valueOf(System.currentTimeMillis());
-                        // inform the Activity about the change based
-                        // interface defintion
-                        listener.onRssItemSelected(newTime);
-                }
-        }"""
-        return ret
+        for field in model["attributes"]:
+            ret += """
+    private """ + self.ctype.get(field["type"]) + """ """ + field["name"] + """;"""
     
-    def buildLayoutDetail(self, model, view):
-        ret = """
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" 
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-        """
-        for field in view["fields"]:
-            for attribute in model["attributes"]:
-                if attribute["name"] == field:
-                    if attribute["type"] == "charField":
-                        ret+="""
-                         <TextView android:layout_width="match_parent" 
-                             android:id="@+id/"""+inflection.underscore(attribute["name"])+"""\"
-                             android:layout_height="wrap_content" 
-                             android:textSize="14dp" android:gravity="center"
-                             android:layout_gravity="center" android:layout_marginLeft="10dp"
-                             android:layout_marginRight="10dp">
-                         </TextView>
-                        """
         ret+="""
+    public """ + model["name"] + """() {
+        super();
+    }
 
-        </LinearLayout>
-        """
+    public """ + model["name"] + """("""
+        ret +=', '.join([str(self.ctype.get(field["type"]) + ' ' + field["name"]) for field in model["attributes"]])
+        ret +=  """) {"""
+    
+        for field in model["attributes"]:
+            ret += """
+        this.""" + field["name"] + """ = """ + field["name"] + """;"""
+        ret+="""
+    }
+
+    protected """ + model["name"] + """(Parcel in) {"""
+        
+        for field in model["attributes"]:
+            if(field["type"] == "Boolean"):
+                ret += """
+        """ + field["name"] + """ = in.readByte() != 0;"""
+            else:
+                ret += """
+        """ + field["name"] + """ = in.read""" + self.ctype.get(field["type"]) + """(); """
+
+        ret += """
+    }
+
+    public static final Creator<""" + model["name"] + """> CREATOR = new Creator<""" + model["name"] + """>() {
+        @Override
+        public """ + model["name"] + """ createFromParcel(Parcel in) {
+            return new """ + model["name"] + """(in);
+        }
+
+        @Override
+        public """ + model["name"] + """[] newArray(int size) {
+            return new """ + model["name"] + """[size];
+        }
+    };
+    
+    """
+        for field in model["attributes"]:
+            ret += """
+    public """ + self.ctype.get(field["type"]) + """ get""" + field["name"] + """() {
+        return """ + field["name"] + """;
+    }
+    """
+    
+        for field in model["attributes"]:
+            ret += """
+    public void set""" + field["name"] + """(""" + self.ctype.get(field["type"]) + """ """ + field["name"] + """) {
+        return """ + field["name"] + """;
+    }
+    """
+
+        ret += """
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(lib);
+        dest.writeByte((byte) (panier ? 1 : 0));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Course course = (Course) o;
+
+        if (panier != course.panier) return false;
+        if (id != null ? !id.equals(course.id) : course.id != null) return false;
+        return lib != null ? lib.equals(course.lib) : course.lib == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (lib != null ? lib.hashCode() : 0);
+        result = 31 * result + (panier ? 1 : 0);
+        return result;
+    }
+}
+"""
         return ret
 
 
