@@ -65,7 +65,7 @@ class AndroidBuild(CrossBuild):
         pass
 
     def buildModel(self, model):
-        self.output.append(("java", "./android/model/"+model["name"], self.buidlModelEntity(model)))
+        self.output.append(("java", "./android/model/"+inflection.underscore(model["name"]), self.buidlModelEntity(model)))
 
     def buidlModelEntity(self, model):
         ret="""package com.efenua.courselocal.model;
