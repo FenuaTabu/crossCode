@@ -5,10 +5,6 @@ import inflection
 class CrossBuild():
     config = None
     output = []
-    
-    def convert(name):
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def loadConfig(self, config):
         with open(config) as data_file:
@@ -19,7 +15,7 @@ class CrossBuild():
             # models
             for model in build["models"]:
                 self.buildModel(model)
-            
+
             # views
             for view in build["views"]:
                 if(view["type"] == "listView"):
@@ -29,7 +25,7 @@ class CrossBuild():
 
     def buildModel(self, model):
         pass
-    
+
     def buildDetailView(self, model, view):
         pass
 
@@ -51,14 +47,14 @@ class CrossBuild():
 class DjangoBuild(CrossBuild):
     def build(self):
         pass
-    
+
     def buildModel(self):
         pass
 
 
 class AndroidBuild(CrossBuild):
     ctype = {"Auto": "Integer", "Char": "String", "Boolean": "boolean"}
-    
+
     def __init__(self, packageName):
         self.packageName = packageName
 
@@ -67,10 +63,10 @@ class AndroidBuild(CrossBuild):
 
     def buildListView(self, model, view):
         pass
-        
+
     def buildModel(self, model):
         self.output.append(("java", "./android/model/"+model["name"], self.buidlModelEntity(model)))
-        
+
     def buidlModelEntity(self, model):
         ret="""package com.efenua.courselocal.model;
 
@@ -82,11 +78,11 @@ import android.os.Parcelable;
  */
 
 public class """ + model["name"] + """ implements Parcelable {"""
-    
+
         for field in model["attributes"]:
             ret += """
     private """ + self.ctype.get(field["type"]) + """ """ + field["name"] + """;"""
-    
+
         ret+="""
     public """ + model["name"] + """() {
         super();
@@ -95,7 +91,7 @@ public class """ + model["name"] + """ implements Parcelable {"""
     public """ + model["name"] + """("""
         ret +=', '.join([str(self.ctype.get(field["type"]) + ' ' + field["name"]) for field in model["attributes"]])
         ret +=  """) {"""
-    
+
         for field in model["attributes"]:
             ret += """
         this.""" + field["name"] + """ = """ + field["name"] + """;"""
@@ -103,7 +99,7 @@ public class """ + model["name"] + """ implements Parcelable {"""
     }
 
     protected """ + model["name"] + """(Parcel in) {"""
-        
+
         for field in model["attributes"]:
             if(field["type"] == "Boolean"):
                 ret += """
@@ -126,7 +122,7 @@ public class """ + model["name"] + """ implements Parcelable {"""
             return new """ + model["name"] + """[size];
         }
     };
-    
+
     """
         for field in model["attributes"]:
             ret += """
@@ -134,7 +130,7 @@ public class """ + model["name"] + """ implements Parcelable {"""
         return """ + field["name"] + """;
     }
     """
-    
+
         for field in model["attributes"]:
             ret += """
     public void set""" + field["name"] + """(""" + self.ctype.get(field["type"]) + """ """ + field["name"] + """) {
@@ -151,31 +147,21 @@ public class """ + model["name"] + """ implements Parcelable {"""
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
-        dest.writeString(lib);
-        dest.writeByte((byte) (panier ? 1 : 0));
+        """
+
+        for field in model["attributes"]:
+            if(field["type"] == "Boolean"):
+                ret += """
+        dest.writeByte((byte) ("""+field["name"]+""" ? 1 : 0)); """
+            else:
+                ret += """
+        dest.write"""+self.ctype.get(field["type"])+"""(field["name"])"""
+        ret += """
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Course course = (Course) o;
-
-        if (panier != course.panier) return false;
-        if (id != null ? !id.equals(course.id) : course.id != null) return false;
-        return lib != null ? lib.equals(course.lib) : course.lib == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (lib != null ? lib.hashCode() : 0);
-        result = 31 * result + (panier ? 1 : 0);
-        return result;
-    }
+    // TODO
+    // Generate equals()
+    // Generate hashCode()
 }
 """
         return ret
