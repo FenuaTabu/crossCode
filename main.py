@@ -1,4 +1,3 @@
-import json
 import os
 import inflection
 
@@ -7,26 +6,19 @@ class CrossBuild():
     output = []
 
     def loadConfig(self, config):
-        with open(config) as data_file:
-            self.config = json.load(data_file)
-
-    def first(self, iterable, default=None):
-        for item in iterable:
-            return item
-        return default
+        self.config = config
 
     def build(self):
-        for build in self.config:
+        for model in self.config.models:
             # models
-            for model in build["models"]:
-                self.buildModel(model)
+            self.buildModel(model)
 
             # views
-            for view in build["views"]:
-                if(view["type"] == "listView"):
-                    self.buildListView(build["models"], view)
-                if(view["type"] == "detailView"):
-                    self.buildDetailView(self.first(x for x in build["models"] if x["name"] == view["model"]), view)
+        for view in self.config.views:
+            if(view.type == "listView"):
+                self.buildListView(build.models, view)
+            if(view.type == "detailView"):
+                self.buildDetailView(build.models, view)
 
     def buildModel(self, model):
         pass
@@ -62,20 +54,20 @@ from __future__ import unicode_literals
 from django.db import models
 
 class Categorie (models.Model):"""
-        for field in model["attributes"]:
-            if field["type"] == "Char":
+        for attr in model.attributes:
+            if attr.type == "Char":
                 ret += """
-    """+field["name"]+""" = models."""+field["type"]+"""Field(max_length="""+field["options"]["max_length"]+""")"""
+    """+attr.name+""" = models."""+attr.type+"""Field(max_length="""+attr.options["max_length"]+""")"""
 
-            if field["type"] == "Boolean":
+            if attr.type == "Boolean":
                 ret += """
-    """+field["name"]+""" = models."""+field["type"]+"""Field(default=False)"""
+    """+attr.name+""" = models."""+attr.type+"""Field(default=False)"""
 
         ret+= """
 
     def __str__(self):
         """
-        ret += 'return ' + ', '.join([str(field) for field in model["display"]])
+        ret += 'return ' + ', '.join([str(field) for field in model.display])
 
         return ret
 
@@ -86,13 +78,13 @@ class AndroidBuild(CrossBuild):
         self.packageName = packageName
 
     def buildDetailView(self, model, view):
-        self.output.append(("xml", "./android/res/"+model["name"]+".xml", self.buildUpdateLayout(model)))
+        self.output.append(("xml", "./android/res/"+model.name+".xml", self.buildUpdateLayout(model)))
 
     def buildListView(self, model, view):
         pass
 
     def buildModel(self, model):
-        self.output.append(("java", "./android/model/"+model["name"]+".java", self.buidlModelEntity(model)))
+        self.output.append(("java", "./android/model/"+model.name+".java", self.buidlModelEntity(model)))
 
     def buildUpdateLayout(self, model):
         ret = """
@@ -101,20 +93,20 @@ class AndroidBuild(CrossBuild):
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     """
-        for field in model["attributes"]:
-            if field["type"] == "Char":
+        for field in field.attributes:
+            if field.type == "Char":
                 ret+="""
     <EditText
-        android:id="@+id/"""+field["name"]+"""\"
+        android:id="@+id/"""+field.name+"""\"
         android:hint="@string/"""+field["label"]+"""\"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"/>"""
 
-            if field["type"] == "Boolean":
+            if field.type == "Boolean":
                 ret+="""
     <CheckBox
-        android:id="@+id/"""+field["name"]+"""\"
+        android:id="@+id/"""+field.name+"""\"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/"""+field["label"]+"""\" />"""
@@ -124,7 +116,7 @@ class AndroidBuild(CrossBuild):
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/update"""+model["name"]+"""\"
+        android:id="@+id/update"""+model.name+"""\"
         android:text="Modifier" />
 
 </RelativeLayout>
@@ -141,64 +133,64 @@ import android.os.Parcelable;
  * Generate by crossCode.
  */
 
-public class """ + model["name"] + """ implements Parcelable {"""
+public class """ + model.name + """ implements Parcelable {"""
 
-        for field in model["attributes"]:
+        for field in model.attributes:
             ret += """
-    private """ + self.ctype.get(field["type"]) + """ """ + field["name"] + """;"""
+    private """ + self.ctype.get(field.type) + """ """ + field.name + """;"""
 
         ret+="""
-    public """ + model["name"] + """() {
+    public """ + model.name + """() {
         super();
     }
 
-    public """ + model["name"] + """("""
-        ret +=', '.join([str(self.ctype.get(field["type"]) + ' ' + field["name"]) for field in model["attributes"]])
+    public """ + model.name + """("""
+        ret +=', '.join("??")
         ret +=  """) {"""
 
-        for field in model["attributes"]:
+        for field in model.attributes:
             ret += """
-        this.""" + field["name"] + """ = """ + field["name"] + """;"""
+        this.""" + field.name + """ = """ + field.name + """;"""
         ret+="""
     }
 
-    protected """ + model["name"] + """(Parcel in) {"""
+    protected """ + model.name + """(Parcel in) {"""
 
-        for field in model["attributes"]:
-            if(field["type"] == "Boolean"):
+        for field in model.attributes:
+            if(field.type == "Boolean"):
                 ret += """
-        """ + field["name"] + """ = in.readByte() != 0;"""
+        """ + field.name + """ = in.readByte() != 0;"""
             else:
                 ret += """
-        """ + field["name"] + """ = in.read""" + self.ctype.get(field["type"]) + """(); """
+        """ + field.name + """ = in.read""" + self.ctype.get(field.type) + """(); """
 
         ret += """
     }
 
-    public static final Creator<""" + model["name"] + """> CREATOR = new Creator<""" + model["name"] + """>() {
+    public static final Creator<""" + model.name + """> CREATOR = new Creator<""" + model.name + """>() {
         @Override
-        public """ + model["name"] + """ createFromParcel(Parcel in) {
-            return new """ + model["name"] + """(in);
+        public """ + model.name + """ createFromParcel(Parcel in) {
+            return new """ + model.name + """(in);
         }
 
         @Override
-        public """ + model["name"] + """[] newArray(int size) {
-            return new """ + model["name"] + """[size];
+        public """ + model.name + """[] newArray(int size) {
+            return new """ + model.name + """[size];
         }
     };
 
     """
-        for field in model["attributes"]:
+        for field in model.attributes:
             ret += """
-    public """ + self.ctype.get(field["type"]) + """ get""" + field["name"] + """() {
-        return """ + field["name"] + """;
+    public """ + self.ctype.get(field.type) + """ get""" + field.name + """() {
+        return """ + field.name + """;
     }
     """
 
-        for field in model["attributes"]:
+        for field in model.attributes:
             ret += """
-    public void set""" + field["name"] + """(""" + self.ctype.get(field["type"]) + """ """ + field["name"] + """) {
-        return """ + field["name"] + """;
+    public void set""" + field.name + """(""" + self.ctype.get(field.type) + """ """ + field.name + """) {
+        return """ + field.name + """;
     }
     """
 
@@ -213,13 +205,13 @@ public class """ + model["name"] + """ implements Parcelable {"""
     public void writeToParcel(Parcel dest, int flags) {
         """
 
-        for field in model["attributes"]:
-            if(field["type"] == "Boolean"):
+        for field in model.attributes:
+            if(field.type == "Boolean"):
                 ret += """
-        dest.writeByte((byte) ("""+field["name"]+""" ? 1 : 0)); """
+        dest.writeByte((byte) ("""+field.name+""" ? 1 : 0)); """
             else:
                 ret += """
-        dest.write"""+self.ctype.get(field["type"])+"""(field["name"])"""
+        dest.write"""+self.ctype.get(field.type)+"""(field.name)"""
         ret += """
     }
 
@@ -229,10 +221,51 @@ public class """ + model["name"] + """ implements Parcelable {"""
 }
 """
         return ret
+        
+class Attribute():
+    options = {}
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
+        
+    def addOption(self, key, value):
+        self.options[key]= value
+
+class Model():
+    attributes = []
+    
+    def __init__(self, name):
+        self.name = name
+      
+    def addAttribute(self, attribute):
+        self.attributes.append(attribute)
+
+class Config():
+    models = []
+    views = []
+    
+    def __init__(self):
+        pass
+        
+    def addModel(self, model):
+        self.models.append(model)
+
+
+config = Config()
+
+course = Model("Course")
+course.display = "lib"
+course.addAttribute(Attribute("id", "BigAuto"))
+attrs = Attribute("lib", "Char")
+attrs.addOption("max_length", "40")
+course.addAttribute(attrs)
+course.addAttribute(Attribute("panier", "Boolean"))
+
+config.addModel(course)
 
 
 if __name__ == "__main__":
-    course = DjangoBuild()
-    course.loadConfig("../crossCodeData/config.json")
+    course = AndroidBuild("")
+    course.loadConfig(config)
     course.build()
     print(course.render())
