@@ -1,0 +1,79 @@
+package com.efenua.courselocal.model;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.orm.SugarRecord;
+
+/**
+ * Generate by crossCode.
+ */
+
+public class {{ model.name }} extends SugarRecord implements Parcelable {
+
+        {%- for field in model.attributes %}
+    private {{ field.ctype }} {{ field.name }};
+        {%- endfor %}
+
+    public {{ model.name }}() {
+        super();
+    }
+
+    {% for field in model.attributes %}
+    public {{ field.ctype }} get{{ field.name_camelize }}() {
+        return {{ field.name }};
+    }
+    {% endfor %}
+
+    {% for field in model.attributes %}
+    public void set{{ field.name_camelize }}({{ field.ctype }} {{ field.name }}) {
+        this.{{ field.name }} = {{ field.name }};
+    }
+    {% endfor %}
+
+    protected {{ model.name }}(Parcel in) {
+        {%- for field in model.attributes %}
+            {%- if field.type == "Boolean" %}
+        {{ field.name }} = in.readByte() != 0;
+            {%- elif(field.type == "ForeignKey") %}
+        {{ field.name }} = ({{ field.ctype }}) in.readParcelable({{ field.ctype }}.class.getClassLoader());
+            {%- else %}
+        {{ field.name }} = in.read{{ field.ctype }}();
+            {%- endif %}
+        {%- endfor %}
+    }
+
+    public static final Creator<{{ model.name }}> CREATOR = new Creator<{{ model.name }}>() {
+        @Override
+        public {{ model.name }} createFromParcel(Parcel in) {
+            return new {{ model.name }}(in);
+        }
+
+        @Override
+        public {{ model.name }}[] newArray(int size) {
+            return new {{ model.name }}[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        {%- for field in model.attributes %}
+            {%- if field.type == "Boolean" %}
+        dest.writeByte((byte) ({{ field.name }} ? 1 : 0));
+            {%- elif(field.type == "ForeignKey") %}
+        dest.writeParcelable({{ field.name }}, flags);
+            {%- else %}
+        dest.write{{ field.ctype }}({{ field.name }});
+            {%- endif %}
+        {%- endfor %}
+    }
+
+    // TODO
+    // Generate equals()
+    // Generate hashCode()
+}

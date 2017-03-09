@@ -1,0 +1,65 @@
+package com.efenua.courselocal.activity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import com.efenua.courselocal.R;
+import com.efenua.courselocal.adapter.{{ model.name }}Adapter;
+import com.efenua.courselocal.model.{{ model.name }};
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+public class {{ model.name }}ListActivity extends AppCompatActivity {
+    private static final String EXTRA_ADD_UPDATE = "com.efenua.courselocal.add_update";
+    private ListView listView;
+    private ArrayList<{{ model.name }}> al{{ model.name }};
+    private {{ model.name }}Adapter {{ model.name_camelize }}Adapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_list_{{ model.name_underscore }}_layout);
+
+
+        listView = (ListView) findViewById(R.id.listView{{ model.name }});
+        reloadData();
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                           int pos, long id) {
+                Intent i = new Intent({{ model.name }}ListActivity.this, {{ model.name }}DetailActivity.class);
+                i.putExtra(EXTRA_ADD_UPDATE, "Update");
+                i.putExtra("{{ model.name_underscore }}", ({{ model.name }}) al{{ model.name }}.get(pos));
+                startActivity(i);
+                return true;
+            }
+        });
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent({{ model.name }}ListActivity.this, {{ model.name }}DetailActivity.class);
+                i.putExtra(EXTRA_ADD_UPDATE, "Add");
+                startActivity(i);
+            }
+        });
+    }
+
+    public void reloadData() {
+        al{{ model.name }} = new ArrayList<{{ model.name }}>({{ model.name }}.listAll({{ model.name }}.class)) ;
+
+        {{ model.name_camelize }}Adapter = new {{ model.name }}Adapter(this, al{{ model.name }});
+        listView.setAdapter({{ model.name_camelize }}Adapter);
+    }
+
+}

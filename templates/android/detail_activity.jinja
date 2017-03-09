@@ -1,0 +1,74 @@
+package com.efenua.courselocal.activity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+
+import com.efenua.courselocal.R;
+import com.efenua.courselocal.model.{{ model.name }};
+
+public class {{ model.name }}DetailActivity extends AppCompatActivity {
+    private static final String EXTRA_ADD_UPDATE = "com.efenua.courselocal.add_update";
+    private EditText editTextLib;
+    private CheckBox checkBoxPanier;
+
+    private boolean edition = false;
+    private long idEdition = 0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_detail_{{ model.name_underscore }}_layout);
+
+        Button buttonSubmit = (Button) findViewById(R.id.buttonSubmit);
+        buttonSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (edition){
+                    {{ model.name }} obj = {{ model.name }}.findById({{ model.name }}.class, idEdition);
+                    //obj.setLib(editTextLib.getText().toString());
+                    obj.save();
+                }
+                else{
+                    {{ model.name }} obj = new {{ model.name }}();
+                    obj.save();
+                }
+                Intent i = new Intent({{ model.name }}DetailActivity.this, {{ model.name }}ListActivity.class);
+                startActivity(i);
+            }
+        });
+
+        Button buttonDelete = (Button) findViewById(R.id.buttonDelete);
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                {{ model.name }} obj = {{ model.name }}.findById({{ model.name }}.class, idEdition);
+                obj.delete();
+                Intent i = new Intent({{ model.name }}DetailActivity.this, {{ model.name }}ListActivity.class);
+                startActivity(i);
+            }
+        });
+
+        Bundle extras = getIntent().getExtras();
+        if (extras.getString(EXTRA_ADD_UPDATE).equals("Update")){
+            {{ model.name }} obj = getIntent().getExtras().getParcelable("{{ model.name_underscore }}");
+            buttonSubmit.setText("Modifier");
+            buttonDelete.setVisibility(View.VISIBLE);
+            idEdition = obj.getId();
+            edition = true;
+        }
+        else{
+            buttonSubmit.setText("Ajouter");
+            buttonDelete.setVisibility(View.INVISIBLE);
+        }
+
+
+    }
+
+}

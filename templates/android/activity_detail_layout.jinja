@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+        {%- for field in model.attributes %}
+            {% if field.type == "Char" %}
+    <EditText
+        android:id="@+id/{{ field.name }}"
+        android:hint="@string/{{ field.label }}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"/>"""
+            {% elif field.type == "Boolean" %}
+    <CheckBox
+        android:id="@+id/{{ model.name }}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/{{ field.label }}" />"""
+            {% endif %}
+        {% endfor %}
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/update{{ model.name }}"
+        android:text="Modifier" />
+
+</RelativeLayout>
